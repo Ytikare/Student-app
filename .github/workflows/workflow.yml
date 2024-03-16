@@ -1,14 +1,11 @@
 name: Build Test Deploy
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
-   build-and-test:
-
+   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -18,8 +15,23 @@ jobs:
         node-version: 20.x
     - name: Install Dependancies
       run: npm install
+   test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Use Node.js 20
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20.x
+        cache: 'npm'
+    - name: Install Dependancies
+      run: npm install
     - name: Run Tests
       run: npm test
+   deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
     - name: Deploy to production
       uses: johnbeynon/render-deploy-action@v0.0.8
       with:
